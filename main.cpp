@@ -29,56 +29,65 @@ int g_gl_width = 640;
 int g_gl_height = 480;
 GLFWwindow *g_window = NULL;
 
-int main() {
+int main(int argc, char *argv[]) {
+	if(argc != 3){ 
+		fprintf(stderr, "ejecutar ./prog x y\n"); 
+		exit(EXIT_FAILURE);
+	}
 	restart_gl_log();
 	/*------------------------------start GL
 	 * context------------------------------*/
 	start_gl();
-
-	int cant_tri = 5;
-    int cant_li = 5;
+int cant_tri = atoi(argv[1]);
+    int cant_li = atoi(argv[2]);
     int nvertx = (cant_tri+1);
     int nverty = (cant_li+1);
     int nvert = nvertx*nverty;
     int ntri = (cant_li)*(cant_tri);
-    GLfloat *points = (GLfloat*)malloc(sizeof(GLfloat)*nvert*2);
+    GLfloat *points = (GLfloat*)malloc(sizeof(GLfloat)*nvert*3);
     GLuint *indices = (GLuint*)malloc(sizeof(GLuint)*ntri*3);
+    GLfloat *colours = (GLfloat*)malloc(sizeof(GLfloat)*nvert*3);
 
     genvertices(points, nvertx, nverty);
     genindices(indices, nvertx, nverty);
+    gencolors(colours, nvert);
 
 	/*------------------------------create
 	 * geometry-------------------------------*/
-	//GLfloat points[] = { 0.0f, 0.5f, 0.0f, 0.5f, -0.5f, 0.0f, -0.5f, -0.5f, 0.0f };
-
+	//GLfloat points[]= { 0.0f, 0.5f, 0.0f, 0.5f, -0.5f, 0.0f, -0.5f, -0.5f, 0.0f };
+	//nvert = 3;
 	//GLfloat colours[] = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
 
 	GLuint points_vbo;
 	glGenBuffers( 1, &points_vbo );
 	glBindBuffer( GL_ARRAY_BUFFER, points_vbo );
-	glBufferData( GL_ARRAY_BUFFER, sizeof(GLfloat)*nvert*2, points, GL_STATIC_DRAW );
+	glBufferData( GL_ARRAY_BUFFER, sizeof(GLfloat)*nvert*3, points, GL_STATIC_DRAW );
 	glEnableClientState( GL_VERTEX_ARRAY );
-    glVertexPointer( 2, GL_FLOAT, 0, 0);
+    glVertexPointer( 3, GL_FLOAT, 0, 0);
 
     GLuint indexBufferID;
     glGenBuffers(1, &indexBufferID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*ntri*3, indices, GL_STATIC_DRAW);
 
-	/*GLuint colours_vbo;
+	GLuint colours_vbo;
 	glGenBuffers( 1, &colours_vbo );
 	glBindBuffer( GL_ARRAY_BUFFER, colours_vbo );
-	glBufferData( GL_ARRAY_BUFFER, 9 * sizeof( GLfloat ), colours, GL_STATIC_DRAW );
-*/
+	glBufferData( GL_ARRAY_BUFFER, nvert*3* sizeof( GLfloat ), colours, GL_STATIC_DRAW );
+
 	GLuint vao;
 	glGenVertexArrays( 1, &vao );
 	glBindVertexArray( vao );
 	glBindBuffer( GL_ARRAY_BUFFER, points_vbo );
 	glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL );
-	//glBindBuffer( GL_ARRAY_BUFFER, colours_vbo );
-	//glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, NULL );
+	glBindBuffer( GL_ARRAY_BUFFER, colours_vbo );
+	glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, NULL );
+	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBufferID );
+	glVertexAttribPointer( 2, 3, GL_UNSIGNED_INT, GL_FALSE, 0, NULL );
 	glEnableVertexAttribArray( 0 );
-	//glEnableVertexAttribArray( 1 );
+	glEnableVertexAttribArray( 1 );
+	glEnableVertexAttribArray( 2 );
+
 
 	/*------------------------------create
 	 * shaders--------------------------------*/
@@ -184,9 +193,8 @@ int main() {
 		glUseProgram( shader_programme );
 		glBindVertexArray( vao );
 		// draw points 0-3 from the currently bound VAO with current in-use shader
-		glDrawArrays( GL_TRIANGLES, 0, 3 );
-		//glDrawElements(GL_TRIANGLES, ntri*3, GL_UNSIGNED_INT, 0);
-        glfwSwapBuffers(g_window);
+		//glDrawArrays( GL_TRIANGLES, 0, 3 );
+		glDrawElements(GL_TRIANGLES, ntri*3, GL_UNSIGNED_INT, 0);
 		// update other events like input handling
 		glfwPollEvents();
 
@@ -239,6 +247,7 @@ int main() {
 			glfwSetWindowShouldClose( g_window, 1 );
 		}
 		// put the stuff we've been drawing onto the display
+		
 		glfwSwapBuffers( g_window );
 	}
 
