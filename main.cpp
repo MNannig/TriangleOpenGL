@@ -25,8 +25,8 @@
 #define GL_LOG_FILE "gl.log"
 
 // keep track of window size for things like the viewport and the mouse cursor
-int g_gl_width = 640;
-int g_gl_height = 480;
+int g_gl_width = 1920;
+int g_gl_height = 1080;
 GLFWwindow *g_window = NULL;
 
 int main(int argc, char *argv[]) {
@@ -38,6 +38,7 @@ int main(int argc, char *argv[]) {
 	/*------------------------------start GL
 	 * context------------------------------*/
 	start_gl();
+	glfwSwapInterval(0);
 int cant_tri = atoi(argv[1]);
     int cant_li = atoi(argv[2]);
     int nvertx = (cant_tri+1);
@@ -82,11 +83,19 @@ int cant_tri = atoi(argv[1]);
 	glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL );
 	glBindBuffer( GL_ARRAY_BUFFER, colours_vbo );
 	glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, NULL );
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBufferID );
-	glVertexAttribPointer( 2, 3, GL_UNSIGNED_INT, GL_FALSE, 0, NULL );
+	//glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBufferID );
+	//glVertexAttribPointer( 2, 3, GL_UNSIGNED_INT, GL_FALSE, 0, NULL );
+
+	unsigned int EBO;
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*ntri*3, indices, GL_STATIC_DRAW);
+
 	glEnableVertexAttribArray( 0 );
 	glEnableVertexAttribArray( 1 );
-	glEnableVertexAttribArray( 2 );
+	//glEnableVertexAttribArray( 2 );
+
+	
 
 
 	/*------------------------------create
@@ -178,7 +187,9 @@ int cant_tri = atoi(argv[1]);
 	glEnable( GL_CULL_FACE ); // cull face
 	glCullFace( GL_BACK );		// cull back face
 	glFrontFace( GL_CW );			// GL_CCW for counter clock-wise
-
+	double t_inicial = glfwGetTime();
+	int cont_fps = 0;
+	float fps_final = 0;
 	while ( !glfwWindowShouldClose( g_window ) ) {
 		static double previous_seconds = glfwGetTime();
 		double current_seconds = glfwGetTime();
@@ -249,9 +260,16 @@ int cant_tri = atoi(argv[1]);
 		// put the stuff we've been drawing onto the display
 		
 		glfwSwapBuffers( g_window );
+		cont_fps++;
 	}
-
+	double t_final = glfwGetTime();
+	t_final= t_final - t_inicial;
+	printf("tiempo final %f\n", t_final);
+	fps_final = cont_fps/t_final;
+	printf("fps :%f\n", fps_final);
 	// close GL context and any other GLFW resources
 	glfwTerminate();
 	return 0;
+
+
 }
