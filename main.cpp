@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 	 * context------------------------------*/
 	start_gl();
 	glfwSwapInterval(0);
-int cant_tri = atoi(argv[1]);
+	int cant_tri = atoi(argv[1]);
     int cant_li = atoi(argv[2]);
     int nvertx = (cant_tri+1);
     int nverty = (cant_li+1);
@@ -53,11 +53,19 @@ int cant_tri = atoi(argv[1]);
     genindices(indices, nvertx, nverty);
     gencolors(colours, nvert);
 
+    printf("tamaño puntos %lu\n", sizeof(GLfloat)*nvert*3);
+    printf("tamaño indices %lu\n", sizeof(GLuint)*ntri*3);
+    printf("tamaño color %lu\n", sizeof(GLfloat)*nvert*3);
+
 	/*------------------------------create
 	 * geometry-------------------------------*/
 	//GLfloat points[]= { 0.0f, 0.5f, 0.0f, 0.5f, -0.5f, 0.0f, -0.5f, -0.5f, 0.0f };
 	//nvert = 3;
 	//GLfloat colours[] = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
+
+    GLuint vao;
+	glGenVertexArrays( 1, &vao );
+	glBindVertexArray( vao );
 
 	GLuint points_vbo;
 	glGenBuffers( 1, &points_vbo );
@@ -66,19 +74,18 @@ int cant_tri = atoi(argv[1]);
 	glEnableClientState( GL_VERTEX_ARRAY );
     glVertexPointer( 3, GL_FLOAT, 0, 0);
 
-    GLuint indexBufferID;
+    /*GLuint indexBufferID;
     glGenBuffers(1, &indexBufferID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*ntri*3, indices, GL_STATIC_DRAW);
-
+	*/
+	
 	GLuint colours_vbo;
 	glGenBuffers( 1, &colours_vbo );
 	glBindBuffer( GL_ARRAY_BUFFER, colours_vbo );
 	glBufferData( GL_ARRAY_BUFFER, nvert*3* sizeof( GLfloat ), colours, GL_STATIC_DRAW );
 
-	GLuint vao;
-	glGenVertexArrays( 1, &vao );
-	glBindVertexArray( vao );
+	
 	glBindBuffer( GL_ARRAY_BUFFER, points_vbo );
 	glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL );
 	glBindBuffer( GL_ARRAY_BUFFER, colours_vbo );
